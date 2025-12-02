@@ -7,5 +7,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # Import additional utilities (optional, add as needed)
+import sqlite3
 import numpy as np
 from datetime import datetime
