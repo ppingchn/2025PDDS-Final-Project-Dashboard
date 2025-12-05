@@ -46,7 +46,7 @@ reviews = df[['review_id', 'order_id', 'rating', 'review_date']].drop_duplicates
 
 # --- SAVE TO SQLITE ---
 
-db_name = "ecommerce.db"
+db_name = "ecommerce_project.db"
 conn = sqlite3.connect(db_name)
 
 # Write tables to database
