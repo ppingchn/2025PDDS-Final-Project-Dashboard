@@ -15,8 +15,16 @@ from datetime import datetime
 app = Dash(__name__)
 
 app.layout = html.Div([
-    html.H1("E-commerce Data Dashboard"),
+    html.H1("Global Growth Dashboard"),
 
+    dcc.Tabs([
+        dcc.Tab(label='Strategy', children=[
+            # Pleaceholders for Tab 1
+        ]),
+        dcc.Tab(label='Operations', children=[
+            # Placeholders for Tab 2
+        ])
+    ])
 ])
 
 if __name__ == '__main__':
