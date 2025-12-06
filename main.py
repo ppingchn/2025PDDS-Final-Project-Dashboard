@@ -11,6 +11,9 @@ import sqlite3
 import numpy as np
 from datetime import datetime
 
+# Import Visualization functions from visual.py
+from visual import get_product_performance
+
 # Create a Dash application instance
 app = Dash(__name__)
 
@@ -22,6 +25,11 @@ app.layout = html.Div([
             # Pleaceholders for Tab 1
         ]),
         dcc.Tab(label='Operations', children=[
+            html.H2("Product Performance Analysis"),
+            dcc.Graph(
+                id='product-performance-graph',
+                figure=get_product_performance()
+            )
             # Placeholders for Tab 2
         ])
     ])
