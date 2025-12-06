@@ -36,8 +36,52 @@ def get_product_performance():
     conn.close()
     
     # Visualization Part
+    fig = go.Figure()
 
+    # Bar Chart -- Total Sales Volume
+    fig.add_trace(
+        go.Bar(
+            x = df['category'],
+            y = df['total_sales_volume'],
+            name = 'Total Sales Volume',
+            marker_color='indianred',
+            yaxis = 'y1'
+        )
+    )
 
-    return df
+    # Line Chart -- Average Customer Rating
+    fig.add_trace(
+        go.Scatter(
+            x = df['category'],
+            y = df['average_customer_rating'],
+            name = 'Average Customer Rating',
+            marker_color='blue',
+            yaxis = 'y2'
+        )
+    )
+
+    # Layout Adjustments
+    fig.update_layout(
+        title = '<b>Product Performance Analysis</b>',
+        xaxis_title = dict(title = "Product Category"),
+        # # Left Y-Axis
+        yaxis = dict(
+            title = "Total Sales Volume",
+            titlefont = dict(color = 'indianred'),
+            tickfont = dict(color = 'indianred'),
+        ),
+        # # Right Y-Axis
+        yaxis2 = dict(
+            title = "Average Customer Rating (1-5)",
+            titlefont = dict(color = 'blue'),
+            tickfont = dict(color = 'blue'),
+            overlaying = 'y',
+            side = 'right',
+            range = [0, 5.5]
+        ),
+        legend = dict(x = 0.1, y = 1.1, orientation = 'h')
+    )
+
+    return fig
 
 # Visualize of Service Quality Over Time (Line Chart)
