@@ -1,8 +1,9 @@
 # Library imports & Setup
 import plotly.express as px
+from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import pandas as pd
-from ..db_service import get_connection, extract_query_from_file
+from db_service import get_connection, extract_query_from_file
 
 # Global Variables (if any)
 
@@ -36,7 +37,7 @@ def get_product_performance():
     conn.close()
     
     # Visualization Part
-    fig = go.Figure()
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     # Bar Chart -- Total Sales Volume
     fig.add_trace(
@@ -46,7 +47,8 @@ def get_product_performance():
             name = 'Total Sales Volume',
             marker_color='indianred',
             yaxis = 'y1'
-        )
+        ),
+        secondary_y = False,
     )
 
     # Line Chart -- Average Customer Rating
@@ -57,30 +59,18 @@ def get_product_performance():
             name = 'Average Customer Rating',
             marker_color='blue',
             yaxis = 'y2'
-        )
+        ),
+        secondary_y = True,
     )
 
     # Layout Adjustments
     fig.update_layout(
-        title = '<b>Product Performance Analysis</b>',
-        xaxis_title = dict(title = "Product Category"),
-        # # Left Y-Axis
-        yaxis = dict(
-            title = "Total Sales Volume",
-            titlefont = dict(color = 'indianred'),
-            tickfont = dict(color = 'indianred'),
-        ),
-        # # Right Y-Axis
-        yaxis2 = dict(
-            title = "Average Customer Rating (1-5)",
-            titlefont = dict(color = 'blue'),
-            tickfont = dict(color = 'blue'),
-            overlaying = 'y',
-            side = 'right',
-            range = [0, 5.5]
-        ),
-        legend = dict(x = 0.1, y = 1.1, orientation = 'h')
+        title_text = "Product Performance Analysis",
     )
+
+    fig.update_xaxes(title_text="Product Category")
+    fig.update_yaxes(title_text="Total Sales Volume", secondary_y=False)
+    fig.update_yaxes(title_text="Average Customer Rating (1-5)", secondary_y=True, range=[0, 5.5])
 
     return fig
 
