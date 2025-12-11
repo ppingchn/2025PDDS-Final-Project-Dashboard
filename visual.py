@@ -97,3 +97,80 @@ def get_product_performance(selected_country = "All Countries"):
     return fig
 
 # Visualize of Service Quality Over Time (Line Chart)
+# Visualize Service Quality Trend (Line + Line)
+def get_service_quality():
+    # Get DB Connection
+    conn = get_connection()
+    
+    # Extract SQL Query
+    query = extract_query_from_file("get_service_quality.sql")
+    if query is None:
+        return None  # Exit if query could not be read
+
+    # Execute Query and Fetch Data
+    df = pd.read_sql_query(query, conn)
+    
+    # Close Connection
+    conn.close()
+    
+    # Convert month column to datetime for plotting
+    df['month'] = pd.to_datetime(df['month'])
+
+    # --------------------------
+    # Visualization Part
+    # --------------------------
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    # Line 1 -- Avg Shipping Days
+    fig.add_trace(
+        go.Scatter(
+            x = df['month'],
+            y = df['avg_shipping_days'],
+            name = 'Avg Shipping Days',
+            marker_color='orange',
+            mode='lines+markers',
+            yaxis='y1'
+        ),
+        secondary_y = False,
+    )
+
+    # Line 2 -- Avg Review Score
+    fig.add_trace(
+        go.Scatter(
+            x = df['month'],
+            y = df['avg_review_score'],
+            name = 'Avg Review Score',
+            marker_color='blue',
+            mode='lines+markers',
+            yaxis='y2'
+        ),
+        secondary_y = True,
+    )
+
+    # Layout Adjustments
+    fig.update_layout(
+        title_text = "Service Quality Trend: Shipping Time vs Customer Satisfaction",
+        hovermode='x unified'
+    )
+
+    # X-axis
+    fig.update_xaxes(
+        title_text="Time (Monthly)",
+        rangeslider=dict(visible=True),
+        type='date'
+    )
+
+    # Left Y-axis
+    fig.update_yaxes(
+        title_text="Avg Shipping Days",
+        secondary_y=False
+    )
+
+    # Right Y-axis
+    fig.update_yaxes(
+        title_text="Avg Review Score (1-5)",
+        secondary_y=True,
+        range=[0, 5.5]
+    )
+
+    return fig

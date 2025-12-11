@@ -12,7 +12,7 @@ import numpy as np
 from datetime import datetime
 
 # Import Visualization functions from visual.py
-from visual import get_product_performance, get_country_list
+from visual import get_product_performance, get_country_list, get_service_quality
 
 # Data fetching
 country_options = get_country_list()
@@ -44,6 +44,11 @@ app.layout = html.Div([
                 id='product-performance-graph'
             )
             # Placeholders for Tab 2
+            html.H2("Service Quality Over Time"),
+            dcc.Graph(
+                id = 'service-quality-graph',
+                figure=get_service_quality()
+            )
         ])
     ])
 ])
