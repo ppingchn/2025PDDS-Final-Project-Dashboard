@@ -12,7 +12,7 @@ import numpy as np
 from datetime import datetime
 
 # Import Visualization functions from visual.py
-from visual import get_product_performance
+from visual import get_product_performance, get_service_quality
 
 # Create a Dash application instance
 app = Dash(__name__)
@@ -29,8 +29,13 @@ app.layout = html.Div([
             dcc.Graph(
                 id='product-performance-graph',
                 figure=get_product_performance()
-            )
+            ),
             # Placeholders for Tab 2
+            html.H2("Service Quality Over Time"),
+            dcc.Graph(
+                id = 'service-quality-graph',
+                figure=get_service_quality()
+            )
         ])
     ])
 ])
