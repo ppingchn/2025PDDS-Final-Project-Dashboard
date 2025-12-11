@@ -13,8 +13,9 @@ def get_country_list():
     df = pd.read_sql_query("SELECT DISTINCT country FROM Customers;", conn)
     conn.close()
 
-    options = [{'label': country, 'value': country} for country in df['country']]
-    options.insert(0, {'label': 'All Countries', 'value': None})
+    options = ['All Countries']
+    for country in df['country']:
+        options.append(country)
     return options
 
 # Visualization Functions for Tab 1: Strategy Tab
@@ -40,11 +41,11 @@ def get_product_performance(selected_country = "All Countries"):
     # Parameterize Query
     if selected_country == "All Countries":
         # Execute Query and Fetch Data
-        df = pd.read_sql_query(query, conn)
+        params = (None, None)
     else:
-        param = (selected_country, selected_country)
-        # Execute Query and Fetch Data
-        df = pd.read_sql_query(query, conn, params = param)
+        params = (selected_country, selected_country)
+
+    df = pd.read_sql_query(query, conn, params=params)
     
     # Close Connection
     conn.close()
@@ -86,8 +87,8 @@ def get_product_performance(selected_country = "All Countries"):
     )
 
     fig.update_xaxes(title_text="Product Category")
-    fig.update_yaxes(title_text="Total Sales Volume", secondary_y=False, autoscale=True)
-    fig.update_yaxes(title_text="Average Customer Rating (1-5)", secondary_y=True, range=[0, 5.5], autoscale=True)
+    fig.update_yaxes(title_text="Total Sales Volume", secondary_y=False, autorange=True)
+    fig.update_yaxes(title_text="Average Customer Rating (1-5)", secondary_y=True, autorange=True)
 
     # Update title
     current_country = selected_country if selected_country else "All Countries"
