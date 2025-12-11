@@ -42,7 +42,7 @@ app.layout = html.Div([
             ),
             dcc.Graph(
                 id='product-performance-graph'
-            )
+            ),
             # Placeholders for Tab 2
             html.H2("Service Quality Over Time"),
             dcc.Graph(
