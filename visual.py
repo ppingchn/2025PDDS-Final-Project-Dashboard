@@ -29,7 +29,7 @@ def get_country_list():
 # Visualization Functions for Tab 2: Operation Tab
 
 # Visualize of Product Issues Pareto (Bar + Line)
-def get_product_performance():
+def get_product_performance(selected_country = "All Countries"):
     # Get DB Connection
     conn = get_connection()
     
@@ -37,12 +37,21 @@ def get_product_performance():
     query = extract_query_from_file("get_product_performance.sql")
     if query is None:
         return None  # Exit if query could not be read
-
-    # Execute Query and Fetch Data
-    df = pd.read_sql_query(query, conn)
+    # Parameterize Query
+    if selected_country == "All Countries":
+        # Execute Query and Fetch Data
+        df = pd.read_sql_query(query, conn)
+    else:
+        param = (selected_country, selected_country)
+        # Execute Query and Fetch Data
+        df = pd.read_sql_query(query, conn, params = param)
     
     # Close Connection
     conn.close()
+
+    if df.empty:
+        print("No data available for the selected country.")
+        return go.Figure().update_layout(title="No data available for the selected country.")
     
     # Visualization Part
     fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -77,8 +86,12 @@ def get_product_performance():
     )
 
     fig.update_xaxes(title_text="Product Category")
-    fig.update_yaxes(title_text="Total Sales Volume", secondary_y=False)
-    fig.update_yaxes(title_text="Average Customer Rating (1-5)", secondary_y=True, range=[0, 5.5])
+    fig.update_yaxes(title_text="Total Sales Volume", secondary_y=False, autoscale=True)
+    fig.update_yaxes(title_text="Average Customer Rating (1-5)", secondary_y=True, range=[0, 5.5], autoscale=True)
+
+    # Update title
+    current_country = selected_country if selected_country else "All Countries"
+    fig.update_layout(title_text=f"Product Performance Analysis - {current_country}")
 
     return fig
 
