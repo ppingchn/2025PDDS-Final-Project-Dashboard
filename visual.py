@@ -14,6 +14,7 @@ def get_country_list():
     conn.close()
 
     options = [{'label': country, 'value': country} for country in df['country']]
+    options.insert(0, {'label': 'All Countries', 'value': None})
     return options
 
 # Visualization Functions for Tab 1: Strategy Tab
@@ -44,7 +45,6 @@ def get_product_performance():
     conn.close()
     
     # Visualization Part
-    # Make subplots with secondary y-axis
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     # Bar Chart -- Total Sales Volume
