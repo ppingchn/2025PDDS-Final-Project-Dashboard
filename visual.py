@@ -7,7 +7,14 @@ from db_service import get_connection, extract_query_from_file
 
 # Global Variables (if any)
 
+# Global / Helper Functions (if any)
+def get_country_list():
+    conn = get_connection()
+    df = pd.read_sql_query("SELECT DISTINCT country FROM Customers;", conn)
+    conn.close()
 
+    options = [{'label': country, 'value': country} for country in df['country']]
+    return options
 
 # Visualization Functions for Tab 1: Strategy Tab
 
@@ -37,6 +44,7 @@ def get_product_performance():
     conn.close()
     
     # Visualization Part
+    # Make subplots with secondary y-axis
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     # Bar Chart -- Total Sales Volume
