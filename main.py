@@ -12,7 +12,10 @@ import numpy as np
 from datetime import datetime
 
 # Import Visualization functions from visual.py
-from visual import get_product_performance, get_service_quality
+from visual import get_product_performance, get_country_list, get_service_quality
+
+# Data fetching
+country_options = get_country_list()
 
 # Create a Dash application instance
 app = Dash(__name__)
@@ -26,10 +29,20 @@ app.layout = html.Div([
         ]),
         dcc.Tab(label='Operations', children=[
             html.H2("Product Performance Analysis"),
-            dcc.Graph(
-                id='product-performance-graph',
-                figure=get_product_performance()
+            html.Div([
+                dcc.Dropdown(
+                    id = 'country-filter',
+                    options = country_options,
+                    value = None,
+                    placeholder = "Select a Country",
+                    clearable = True,
+                    style = {'width': '50%'}
+                )
+            ], style={'padding': '20px'}
             ),
+            dcc.Graph(
+                id='product-performance-graph'
+            )
             # Placeholders for Tab 2
             html.H2("Service Quality Over Time"),
             dcc.Graph(
@@ -39,6 +52,14 @@ app.layout = html.Div([
         ])
     ])
 ])
+
+# Callback for interactivity
+@callback(
+    Output('product-performance-graph', 'figure'),
+    Input('country-filter', 'value')
+)
+def update_product_performance(selected_country):
+    return get_product_performance(selected_country)
 
 if __name__ == '__main__':
     app.run(debug=True)
