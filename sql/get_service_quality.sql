@@ -12,7 +12,7 @@ ON
     o.order_id = r.order_id
 WHERE
     o.delivery_date IS NOT NULL
-    AND (? IS NULL OR o.country = ?)
+    AND (? IS NULL OR c.country = ?)
 GROUP BY
     STRFTIME('%Y-%m-01', o.order_date)
 ORDER BY
