@@ -18,6 +18,16 @@ def get_country_list():
         options.append(country)
     return options
 
+def get_year_list():
+    conn = get_connection()
+    df = pd.read_sql_query("SELECT DISTINCT strftime('%Y', order_date) as year FROM Orders ORDER BY year;", conn)
+    conn.close()
+
+    options = []
+    for year in df['year']:
+        options.append(year)
+    return options
+
 # Visualization Functions for Tab 1: Strategy Tab
 
 # Visualize of Global Revenue Map (Choropleth)
