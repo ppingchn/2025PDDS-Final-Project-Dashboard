@@ -33,50 +33,94 @@ def get_year_list():
 # Visualize of Global Revenue Map (Choropleth)
 
 def get_global_revenue(selected_year=None):
+    # 1. Connect & Fetch ALL Data
     conn = get_connection()
     query = extract_query_from_file("get_global_revenue.sql")
     
     if query is None:
         return go.Figure()
-    if selected_year == "All Years" or selected_year is None:
-        params = (None, None)
-    else:
-        str_year = str(selected_year)
-        params = (str_year, str_year)
 
-    df = pd.read_sql_query(query, conn, params=params)
+    df = pd.read_sql_query(query, conn)
     conn.close()
 
     if df.empty:
-        print("No data available for the selected country.")
-        return go.Figure().update_layout(title="No data available for the selected country.")
+        return go.Figure().update_layout(title="No Data Found")
+
+    # --- 2. CALCULATE YEAR-OVER-YEAR GROWTH ---
     
-    # Visualization Part
+    # Sort data to ensure shift works correctly
+    df = df.sort_values(by=['country', 'year'])
+
+    # Shift to get previous year's revenue
+    df['prev_revenue'] = df.groupby('country')['total_revenue'].shift(1)
+
+    # Calculate Growth %
+    df['yoy_growth'] = ((df['total_revenue'] - df['prev_revenue']) / df['prev_revenue']) * 100
+
+    # --- FORMATTING GROWTH LABEL (HTML Styling) ---
+    def format_growth_html(x):
+        if pd.isna(x):
+            return "-" # First year or N/A
+        elif x > 0:
+            # Green Up Arrow
+            return f"<span style='color:green;'>▲</span> +{x:.1f}%"
+        elif x < 0:
+            # Red Down Arrow
+            return f"<span style='color:red;'>▼</span> {x:.1f}%"
+        else:
+            # Equal (0% change)
+            return "-"
+
+    df['growth_label'] = df['yoy_growth'].apply(format_growth_html)
+
+    # --- 3. FILTER FOR SELECTED YEAR ---
+    if selected_year:
+        target_year = str(selected_year)
+        df_plot = df[df['year'] == target_year].copy()
+    else:
+        # Default to latest year
+        latest_year = df['year'].max()
+        df_plot = df[df['year'] == latest_year].copy()
+        selected_year = latest_year
+
+    if df_plot.empty:
+        return go.Figure().update_layout(title=f"No Data for {selected_year}")
+
+    # --- 4. CREATE VISUALIZATION ---
     fig = px.scatter_geo(
-        df,
+        df_plot,
         locations="country",
         locationmode="country names",
-        
         color="total_revenue",
         size="total_revenue",
-        
         hover_name="country",
         projection="natural earth",
-        title=f"Profitability vs. Efficiency Map ({selected_year if selected_year else 'All Years'})",
+        title=f"Revenue Map ({selected_year})",
         template="plotly_white",
-        
         color_continuous_scale=px.colors.sequential.Blues,
-        custom_data=['total_revenue', 'avg_basket_size', 'avg_delivery_time']
+        
+        # Add 'growth_label' to custom_data (Index 3)
+        custom_data=['total_revenue', 'avg_basket_size', 'avg_delivery_time', 'growth_label']
     )
 
+    # Update Tooltip with HTML support
     fig.update_traces(
-        hovertemplate="<b>%{hovertext}</b><br><br>" +
+        hovertemplate="<b>%{hovertext}</b><br>" +
+                      "<i>Growth: %{customdata[3]}</i><br><br>" + # Shows colored arrow
                       "Total Revenue: $%{customdata[0]:,.0f}<br>" +
                       "Avg. Basket Size: $%{customdata[1]:,.0f}<br>" +
                       "Avg. Delivery Time: %{customdata[2]:.1f} days<extra></extra>"
     )
     
-    fig.update_layout(coloraxis_colorbar=dict(title="Revenue ($)"))
+    # Ensure Hover Background is White
+    fig.update_layout(
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=14,
+            font_family="Arial"
+        ),
+        coloraxis_colorbar=dict(title="Revenue ($)")
+    )
 
     return fig
 
