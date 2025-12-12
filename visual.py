@@ -37,7 +37,20 @@ def get_global_revenue():
     # Close Connection
     conn.close()
 
+    fig = px.scatter_geo(
+        df,
+        locations="country",
+        locationmode="country names",
+        color="total_revenue",
+        hover_name="country",
+        size="total_revenue",
+        projection="natural earth",
+        title="Global Revenue by Country"
+    )
+
     
+
+    return fig
 
 # Visualize of Customer Value Matrix (Scatter Plot)
 
