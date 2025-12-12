@@ -37,18 +37,38 @@ def get_global_revenue():
     # Close Connection
     conn.close()
 
+    if df.empty:
+        print("No data available for the selected country.")
+        return go.Figure().update_layout(title="No data available for the selected country.")
+    
     fig = px.scatter_geo(
         df,
         locations="country",
         locationmode="country names",
         color="total_revenue",
-        hover_name="country",
         size="total_revenue",
+        hover_name="country",
         projection="natural earth",
-        title="Global Revenue by Country"
+        title="Profitability vs. Efficiency Map",
+        template="plotly_white",
+        
+        color_continuous_scale=px.colors.sequential.Blues,
+        
+        custom_data=['total_revenue', 'avg_basket_size', 'avg_delivery_time']
     )
 
+    fig.update_traces(
+        hovertemplate="<b>%{hovertext}</b><br><br>" +
+                      "Total Revenue: $%{customdata[0]:,.0f}<br>" +
+                      "Avg. Basket Size: $%{customdata[1]:,.0f}<br>" +
+                      "Avg. Delivery Time: %{customdata[2]:.1f} days<extra></extra>"
+    )
     
+    fig.update_layout(
+        coloraxis_colorbar=dict(
+            title="Revenue ($)",
+        )
+    )
 
     return fig
 
