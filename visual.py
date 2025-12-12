@@ -98,7 +98,7 @@ def get_product_performance(selected_country = "All Countries"):
 
 # Visualize of Service Quality Over Time (Line Chart)
 # Visualize Service Quality Trend (Line + Line)
-def get_service_quality():
+def get_service_quality(selected_country = "All Countries"):
     # Get DB Connection
     conn = get_connection()
     
@@ -106,19 +106,29 @@ def get_service_quality():
     query = extract_query_from_file("get_service_quality.sql")
     if query is None:
         return None  # Exit if query could not be read
+    # Parameterize Query
+    if selected_country == "All Countries":
+        # Execute Query and Fetch Data
+        params = (None, None)
+    else:
+        params = (selected_country, selected_country)
 
-    # Execute Query and Fetch Data
-    df = pd.read_sql_query(query, conn)
+    df = pd.read_sql_query(query, conn, params=params)
     
     # Close Connection
     conn.close()
-    
+
+    if df.empty:
+        print("No data available for the selected country.")
+        return go.Figure().update_layout(title="No data available for the selected country.")
+
     # Convert month column to datetime for plotting
     df['month'] = pd.to_datetime(df['month'])
 
     # --------------------------
     # Visualization Part
     # --------------------------
+
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     # Line 1 -- Avg Shipping Days
@@ -147,9 +157,11 @@ def get_service_quality():
         secondary_y = True,
     )
 
+    current_country = selected_country if selected_country else "All Countries"
+
     # Layout Adjustments
     fig.update_layout(
-        title_text = "Service Quality Trend: Shipping Time vs Customer Satisfaction",
+        title_text = f"Service Quality Trend: Shipping Time vs Customer Satisfaction - {current_country}",
         hovermode='x unified'
     )
 
