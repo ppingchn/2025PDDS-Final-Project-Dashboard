@@ -12,7 +12,7 @@ import numpy as np
 from datetime import datetime
 
 # Import Visualization functions from visual.py
-from visual import get_product_performance, get_country_list, get_service_quality
+from visual import get_product_performance, get_country_list, get_service_quality, get_global_revenue
 
 # Data fetching
 country_options = get_country_list()
@@ -26,6 +26,11 @@ app.layout = html.Div([
     dcc.Tabs([
         dcc.Tab(label='Strategy', children=[
             # Pleaceholders for Tab 1
+            html.H2("Global Revenue Visualization"),
+            dcc.Graph(
+                id='global-revenue-graph',
+                figure = get_global_revenue()
+            )
         ]),
         dcc.Tab(label='Operations', children=[
             html.H2("Product Performance Analysis"),
