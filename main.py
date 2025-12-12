@@ -12,10 +12,11 @@ import numpy as np
 from datetime import datetime
 
 # Import Visualization functions from visual.py
-from visual import get_product_performance, get_country_list, get_service_quality, get_global_revenue
+from visual import get_product_performance, get_country_list, get_service_quality, get_global_revenue, get_year_list
 
 # Data fetching
 country_options = get_country_list()
+year_options = get_year_list()
 
 # Create a Dash application instance
 app = Dash(__name__)
@@ -25,12 +26,25 @@ app.layout = html.Div([
 
     dcc.Tabs([
         dcc.Tab(label='Strategy', children=[
-            # Pleaceholders for Tab 1
-            html.H2("Global Revenue Visualization"),
-            dcc.Graph(
-                id='global-revenue-graph',
-                figure = get_global_revenue()
-            )
+            html.Div([
+                html.H2("Global Revenue Visualization"),
+                
+                # ส่วน Filter ปี (Year Dropdown)
+                html.Div([
+                    html.Label("Select Year: ", style={'fontWeight': 'bold', 'marginRight': '10px'}),
+                    dcc.Dropdown(
+                        id='year-filter',
+                        options=year_options,
+                        value=year_options[0], # Default Value
+                        clearable=False,
+                        style={'width': '200px'}
+                    )
+                ], style={'display': 'flex', 'justifyContent': 'flex-end', 'marginBottom': '10px'}),
+                
+                # กราฟ Map (จะถูกอัปเดตโดย Callback)
+                dcc.Graph(id='global-revenue-graph')
+                
+            ], style={'padding': '20px'})
         ]),
         dcc.Tab(label='Operations', children=[
             html.H2("Product Performance Analysis"),
@@ -61,12 +75,20 @@ app.layout = html.Div([
 @callback(
     [
         Output('product-performance-graph', 'figure'),
-        Output('service-quality-graph', 'figure')
+        Output('service-quality-graph', 'figure'),
     ],
     Input('country-filter', 'value')
 )
 def update_product_performance(selected_country):
     return get_product_performance(selected_country), get_service_quality(selected_country)
+
+@callback(
+    Output('global-revenue-graph', 'figure'),
+    Input('year-filter', 'value')
+)
+
+def update_global_revenue(selected_year):
+    return get_global_revenue(selected_year)
 
 if __name__ == '__main__':
     app.run(debug=True)
