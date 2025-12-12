@@ -22,7 +22,22 @@ def get_country_list():
 
 # Visualize of Global Revenue Map (Choropleth)
 
+def get_global_revenue():
+    # Get DB Connection
+    conn = get_connection()
 
+    # Extract SQL Query
+    query = extract_query_from_file("get_global_revenue.sql")
+    if query is None:
+        return None  # Exit if query could not be read
+    
+    # Execute Query and Fetch Data
+    df = pd.read_sql_query(query, conn)
+
+    # Close Connection
+    conn.close()
+
+    
 
 # Visualize of Customer Value Matrix (Scatter Plot)
 
