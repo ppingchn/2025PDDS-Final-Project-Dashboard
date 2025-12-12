@@ -20,7 +20,7 @@ def get_country_list():
 
 def get_year_list():
     conn = get_connection()
-    df = pd.read_sql_query("SELECT DISTINCT strftime('%Y', order_date) as year FROM Orders ORDER BY year;", conn)
+    df = pd.read_sql_query("SELECT DISTINCT strftime('%Y', order_date) as year FROM Orders ORDER BY year DESC;", conn)
     conn.close()
 
     options = []
@@ -32,38 +32,40 @@ def get_year_list():
 
 # Visualize of Global Revenue Map (Choropleth)
 
-def get_global_revenue():
-    # Get DB Connection
+def get_global_revenue(selected_year=None):
     conn = get_connection()
-
-    # Extract SQL Query
     query = extract_query_from_file("get_global_revenue.sql")
-    if query is None:
-        return None  # Exit if query could not be read
     
-    # Execute Query and Fetch Data
-    df = pd.read_sql_query(query, conn)
+    if query is None:
+        return go.Figure()
+    if selected_year == "All Years" or selected_year is None:
+        params = (None, None)
+    else:
+        str_year = str(selected_year)
+        params = (str_year, str_year)
 
-    # Close Connection
+    df = pd.read_sql_query(query, conn, params=params)
     conn.close()
 
     if df.empty:
         print("No data available for the selected country.")
         return go.Figure().update_layout(title="No data available for the selected country.")
     
+    # Visualization Part
     fig = px.scatter_geo(
         df,
         locations="country",
         locationmode="country names",
+        
         color="total_revenue",
         size="total_revenue",
+        
         hover_name="country",
         projection="natural earth",
-        title="Profitability vs. Efficiency Map",
+        title=f"Profitability vs. Efficiency Map ({selected_year if selected_year else 'All Years'})",
         template="plotly_white",
         
         color_continuous_scale=px.colors.sequential.Blues,
-        
         custom_data=['total_revenue', 'avg_basket_size', 'avg_delivery_time']
     )
 
@@ -74,11 +76,7 @@ def get_global_revenue():
                       "Avg. Delivery Time: %{customdata[2]:.1f} days<extra></extra>"
     )
     
-    fig.update_layout(
-        coloraxis_colorbar=dict(
-            title="Revenue ($)",
-        )
-    )
+    fig.update_layout(coloraxis_colorbar=dict(title="Revenue ($)"))
 
     return fig
 
