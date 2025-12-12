@@ -46,8 +46,7 @@ app.layout = html.Div([
             # Placeholders for Tab 2
             html.H2("Service Quality Over Time"),
             dcc.Graph(
-                id = 'service-quality-graph',
-                figure=get_service_quality()
+                id = 'service-quality-graph'
             )
         ])
     ])
@@ -55,11 +54,14 @@ app.layout = html.Div([
 
 # Callback for interactivity
 @callback(
-    Output('product-performance-graph', 'figure'),
+    [
+        Output('product-performance-graph', 'figure'),
+        Output('service-quality-graph', 'figure')
+    ],
     Input('country-filter', 'value')
 )
 def update_product_performance(selected_country):
-    return get_product_performance(selected_country)
+    return get_product_performance(selected_country), get_service_quality(selected_country)
 
 if __name__ == '__main__':
     app.run(debug=True)
