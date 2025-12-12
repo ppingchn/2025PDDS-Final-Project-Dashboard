@@ -4,6 +4,8 @@ SELECT
     AVG(r.rating) AS avg_review_score
 FROM
     Orders o
+JOIN 
+    Customers c ON o.customer_id = c.customer_id
 LEFT JOIN
     Reviews r
 ON
