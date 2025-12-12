@@ -29,7 +29,6 @@ app.layout = html.Div([
             html.Div([
                 html.H2("Global Revenue Visualization"),
                 
-                # ส่วน Filter ปี (Year Dropdown)
                 html.Div([
                     html.Label("Select Year: ", style={'fontWeight': 'bold', 'marginRight': '10px'}),
                     dcc.Dropdown(
@@ -41,7 +40,6 @@ app.layout = html.Div([
                     )
                 ], style={'display': 'flex', 'justifyContent': 'flex-end', 'marginBottom': '10px'}),
                 
-                # กราฟ Map (จะถูกอัปเดตโดย Callback)
                 dcc.Graph(id='global-revenue-graph')
                 
             ], style={'padding': '20px'})
