@@ -7,5 +7,6 @@ SELECT
 FROM Orders AS o
 JOIN Customers AS c ON o.customer_id = c.customer_id
 JOIN Order_Items AS oi ON o.order_id = oi.order_id
+WHERE (? IS NULL OR strftime('%Y', o.order_date) = ?)
 GROUP BY 
     c.country;
