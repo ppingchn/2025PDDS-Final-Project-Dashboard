@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Import additional utilities (optional, add as needed)
+# Import additional utilities
 import sqlite3
 import numpy as np
 from datetime import datetime
@@ -18,60 +18,150 @@ from visual import get_product_performance, get_country_list, get_service_qualit
 country_options = get_country_list()
 year_options = get_year_list()
 
+# --- CSS STYLES CONFIGURATION ---
+THEME = {
+    'background': '#F0F2F5',      
+    'card_bg': '#FFFFFF',         
+    'primary': '#0052CC',         
+    'text': '#172B4D',            
+    'text_light': '#6B778C',      
+    'border': '#DFE1E6',          
+    'shadow': '0 4px 6px rgba(0, 0, 0, 0.1)' 
+}
+
+
+graph_wrapper_style = {
+    'width': '90%',       
+    'margin': '0 auto',   
+    'display': 'block'
+}
+
+tabs_styles = {
+    'height': '44px',
+    'alignItems': 'center',
+    'borderBottom': f'1px solid {THEME["border"]}'
+}
+tab_style = {
+    'borderBottom': '1px solid #d6d6d6',
+    'padding': '12px',
+    'fontWeight': 'bold',
+    'color': THEME['text_light'],
+    'backgroundColor': '#FAFBFC'
+}
+tab_selected_style = {
+    'borderTop': f'3px solid {THEME["primary"]}',
+    'borderBottom': '1px solid #d6d6d6',
+    'backgroundColor': 'white',
+    'color': THEME['primary'],
+    'padding': '12px',
+    'fontWeight': 'bold'
+}
+
+card_container_style = {
+    'backgroundColor': THEME['card_bg'],
+    'borderRadius': '8px',
+    'boxShadow': THEME['shadow'],
+    'padding': '24px',
+    'marginBottom': '24px',
+    'border': f'1px solid {THEME["border"]}'
+}
+
 # Create a Dash application instance
 app = Dash(__name__)
 
-app.layout = html.Div([
-    html.H1("Global Growth Dashboard"),
+app.layout = html.Div(style={'backgroundColor': THEME['background'], 'fontFamily': 'Segoe UI, Roboto, Helvetica, Arial, sans-serif', 'minHeight': '100vh', 'padding': '20px'}, children=[
+    
+    # --- HEADER ---
+    html.Div([
+        html.H1("3PY E-COMMERCE: Global Growth Dashboard", style={'color': THEME['primary'], 'fontSize': '28px', 'marginBottom': '5px'}),
+        html.P("Strategic and Operational Overview", style={'color': THEME['text_light'], 'fontSize': '16px', 'marginTop': '0'})
+    ], style={'marginBottom': '20px', 'paddingLeft': '10px'}),
 
-    dcc.Tabs([
-        dcc.Tab(label='Strategy', children=[
-            html.Div([
-                html.H2("Global Revenue Visualization"),
+    # --- TABS ---
+    dcc.Tabs(style=tabs_styles, children=[
+        
+        # === TAB 1: STRATEGY ===
+        dcc.Tab(label='Strategy Overview', style=tab_style, selected_style=tab_selected_style, children=[
+            html.Div(style={'padding': '20px'}, children=[
                 
-                # ส่วน Filter ปี (Year Dropdown)
-                html.Div([
-                    html.Label("Select Year: ", style={'fontWeight': 'bold', 'marginRight': '10px'}),
-                    dcc.Dropdown(
-                        id='year-filter',
-                        options=year_options,
-                        value=year_options[0], # Default Value
-                        clearable=False,
-                        style={'width': '200px'}
-                    )
-                ], style={'display': 'flex', 'justifyContent': 'flex-end', 'marginBottom': '10px'}),
-                
-                # กราฟ Map (จะถูกอัปเดตโดย Callback)
-                dcc.Graph(id='global-revenue-graph')
-                
-            ], style={'padding': '20px'})
+                # Card: Revenue Map
+                html.Div(style=card_container_style, children=[
+                    html.Div([
+                        html.Div([
+                            html.H2("Global Revenue Visualization", style={'fontSize': '22px', 'color': THEME['text'], 'marginBottom': '10px'}),
+                            html.P("Overview of total revenue and efficiency across different regions.", style={'color': THEME['text_light'], 'fontSize': '14px'})
+                        ], style={'width': '60%'}),
+                        
+                        html.Div([
+                            html.Label("Select Year:", style={'fontWeight': 'bold', 'marginRight': '10px', 'color': THEME['text']}),
+                            dcc.Dropdown(
+                                id='year-filter',
+                                options=year_options,
+                                value=year_options[0] if year_options else None,
+                                clearable=False,
+                                style={'width': '150px'}
+                            )
+                        ], style={'width': '40%', 'display': 'flex', 'justifyContent': 'flex-end', 'alignItems': 'center'})
+                    ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'start', 'marginBottom': '20px'}),
+                    
+                    # Graph: Map wrapped in centering div
+                    html.Div(style=graph_wrapper_style, children=[
+                        dcc.Graph(
+                            id='global-revenue-graph',
+                            style={'height': '80vh'} 
+                        )
+                    ])
+                ])
+            ])
         ]),
-        dcc.Tab(label='Operations', children=[
-            html.H2("Product Performance Analysis"),
-            html.Div([
-                dcc.Dropdown(
-                    id = 'country-filter',
-                    options = country_options,
-                    value = None,
-                    placeholder = "Select a Country",
-                    clearable = True,
-                    style = {'width': '50%'}
-                )
-            ], style={'padding': '20px'}
-            ),
-            dcc.Graph(
-                id='product-performance-graph'
-            ),
-            # Placeholders for Tab 2
-            html.H2("Service Quality Over Time"),
-            dcc.Graph(
-                id = 'service-quality-graph'
-            )
+
+        # === TAB 2: OPERATIONS ===
+        dcc.Tab(label='Operational Information', style=tab_style, selected_style=tab_selected_style, children=[
+            html.Div(style={'padding': '20px'}, children=[
+                
+                # Filter Section
+                html.Div(style=card_container_style, children=[
+                    html.Label("Filter by Country:", style={'fontWeight': 'bold', 'marginBottom': '10px', 'display': 'block', 'color': THEME['text']}),
+                    dcc.Dropdown(
+                        id='country-filter',
+                        options=country_options,
+                        value=None,
+                        placeholder="Select a Country to analyze specific performance...",
+                        clearable=True,
+                        style={'width': '100%', 'maxWidth': '400px'}
+                    )
+                ]),
+
+                # Card: Product Performance
+                html.Div(style=card_container_style, children=[
+                    html.H2("Product Performance Analysis", style={'fontSize': '22px', 'color': THEME['text'], 'marginBottom': '20px'}),
+                    # Graph wrapper
+                    html.Div(style=graph_wrapper_style, children=[
+                        dcc.Graph(
+                            id='product-performance-graph',
+                            style={'height': '500px'} 
+                        )
+                    ])
+                ]),
+
+                # Card: Service Quality
+                html.Div(style=card_container_style, children=[
+                    html.H2("Service Quality Over Time", style={'fontSize': '22px', 'color': THEME['text'], 'marginBottom': '20px'}),
+                    # Graph wrapper
+                    html.Div(style=graph_wrapper_style, children=[
+                        dcc.Graph(
+                            id='service-quality-graph',
+                            style={'height': '500px'}
+                        )
+                    ])
+                ])
+            ])
         ])
     ])
 ])
 
-# Callback for interactivity
+# --- CALLBACKS ---
+
 @callback(
     [
         Output('product-performance-graph', 'figure'),
@@ -80,15 +170,58 @@ app.layout = html.Div([
     Input('country-filter', 'value')
 )
 def update_product_performance(selected_country):
-    return get_product_performance(selected_country), get_service_quality(selected_country)
+    fig_product, fig_service = get_product_performance(selected_country), get_service_quality(selected_country)
+    
+    # Style Product Graph
+    fig_product.update_traces(marker_color=THEME['primary'], selector=dict(type='bar'))
+    fig_product.update_traces(line_color='#FFAB00', selector=dict(type='scatter')) 
+    
+    fig_product.update_layout(
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        font={'family': 'Segoe UI, sans-serif', 'color': THEME['text']},
+        margin=dict(l=40, r=40, t=40, b=40)
+    )
+
+    # Style Service Graph
+    fig_service.update_traces(line_color='#FFAB00', selector=dict(name='Avg Shipping Days')) 
+    fig_service.update_traces(line_color=THEME['primary'], selector=dict(name='Avg Review Score'))
+    
+    fig_service.update_layout(
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        font={'family': 'Segoe UI, sans-serif', 'color': THEME['text']},
+        margin=dict(l=40, r=40, t=40, b=40),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+
+    return fig_product, fig_service
 
 @callback(
     Output('global-revenue-graph', 'figure'),
     Input('year-filter', 'value')
 )
-
 def update_global_revenue(selected_year):
-    return get_global_revenue(selected_year)
+    fig_map = get_global_revenue(selected_year)
+    
+    
+    fig_map.update_layout(
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        font={'family': 'Segoe UI, sans-serif', 'color': THEME['text']},
+        margin=dict(l=0, r=0, t=30, b=0),
+        geo=dict(
+            bgcolor='white',            
+            showland=True,              
+            landcolor="#EAE7E7",       
+            countrycolor='white',       
+            showcoastlines=False,       
+            showframe=False,            
+            projection_type='natural earth'
+        )
+    )
+    
+    return fig_map
 
 if __name__ == '__main__':
     app.run(debug=True)
