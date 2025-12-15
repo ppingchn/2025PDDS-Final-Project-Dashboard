@@ -200,6 +200,13 @@ def get_product_performance(selected_country = "All Countries"):
         secondary_y = True,
     )
 
+    fig.add_hline(
+        y = avg_sales_volume,
+        line_dash="dot",
+        annotation_text="Avg Sales Volume",
+        line_color="green"
+    )
+
     # Layout Adjustments
     fig.update_layout(
         title_text = "Product Performance Analysis",
