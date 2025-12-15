@@ -173,7 +173,7 @@ def update_product_performance(selected_country):
     fig_product, fig_service = get_product_performance(selected_country), get_service_quality(selected_country)
     
     # Style Product Graph
-    fig_product.update_traces(marker_color=THEME['primary'], selector=dict(type='bar'))
+    # fig_product.update_traces(marker_color=THEME['primary'], selector=dict(type='bar'))
     fig_product.update_traces(line_color='#FFAB00', selector=dict(type='scatter')) 
     
     fig_product.update_layout(
