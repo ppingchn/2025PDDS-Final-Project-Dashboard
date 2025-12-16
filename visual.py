@@ -231,7 +231,7 @@ def get_product_performance(selected_country = "All Countries"):
 
     for index, row in df.iterrows():
         if row['total_sales_volume'] < avg_sales_volume and row['average_customer_rating'] < avg_rating:
-            color_conditions.append('#D32F2F')  # Red Color Added
+            color_conditions.append('#FF8C00')  # Red Color Added
             annotations.append('Action Needed')
         else:
             color_conditions.append('#1976D2')  # Blue Color Added

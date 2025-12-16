@@ -226,7 +226,7 @@ def update_product_performance(selected_country):
     
     # Style Product Graph
     # fig_product.update_traces(marker_color=THEME['primary'], selector=dict(type='bar'))
-    fig_product.update_traces(line_color='#FFAB00', selector=dict(type='scatter')) 
+    fig_product.update_traces(line_color='#000080', selector=dict(type='scatter')) 
     
     fig_product.update_layout(
         paper_bgcolor='white',
