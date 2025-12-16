@@ -66,16 +66,43 @@ card_container_style = {
     'border': f'1px solid {THEME["border"]}'
 }
 
+header_style = {
+    'backgroundColor': 'white',
+    'padding': '25px 30px',
+    'borderRadius': '12px',
+    'marginBottom': '30px',
+    'boxShadow': '0 4px 20px rgba(0, 82, 204, 0.1)', # เงาสีฟ้านุ่มๆ
+    'display': 'flex',
+    'flexDirection': 'column',
+    'borderLeft': f'6px solid {THEME["primary"]}' # เส้น Accent สีน้ำเงินด้านซ้าย
+}
+
 # Create a Dash application instance
 app = Dash(__name__)
 
 app.layout = html.Div(style={'backgroundColor': THEME['background'], 'fontFamily': 'Segoe UI, Roboto, Helvetica, Arial, sans-serif', 'minHeight': '100vh', 'padding': '20px'}, children=[
     
     # --- HEADER ---
-    html.Div([
-        html.H1("3PY E-COMMERCE: Global Growth Dashboard", style={'color': THEME['primary'], 'fontSize': '28px', 'marginBottom': '5px'}),
-        html.P("Strategic and Operational Overview", style={'color': THEME['text_light'], 'fontSize': '16px', 'marginTop': '0'})
-    ], style={'marginBottom': '20px', 'paddingLeft': '10px'}),
+    html.Div(style=header_style, children=[
+        html.Div([
+            html.Span("📊", style={'fontSize': '32px', 'marginRight': '15px'}),
+            html.Div([
+                html.H1("3PY E-COMMERCE", style={
+                    'color': THEME['primary'], 
+                    'fontSize': '28px', 
+                    'marginBottom': '0', 
+                    'fontWeight': '800',
+                    'letterSpacing': '1px'
+                }),
+                html.P("Global Growth Dashboard: Strategic & Operational Overview", style={
+                    'color': THEME['text_light'], 
+                    'fontSize': '16px', 
+                    'marginTop': '5px',
+                    'fontWeight': '500'
+                })
+            ])
+        ], style={'display': 'flex', 'alignItems': 'center'})
+    ]),
 
     # --- TABS ---
     dcc.Tabs(style=tabs_styles, children=[
