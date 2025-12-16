@@ -129,6 +129,73 @@ def get_global_revenue(selected_year=None):
 
 # Visualization Functions for Tab 2: Operation Tab
 
+def get_customer_matrix_plot(selected_year=None, selected_country="All Countries", return_kpis=False):
+    # 1. Connect & Fetch Data
+    conn = get_connection()
+    query = extract_query_from_file("get_customer_matrix.sql")
+    
+    if query is None:
+        return go.Figure().update_layout(title="SQL Query not found.")
+
+    df = pd.read_sql_query(query, conn)
+    conn.close()
+
+    # --- 2. Filter by year & country ---
+    if selected_year:
+        df = df[df['year'] == str(selected_year)]
+    
+    if selected_country != "All Countries":
+        df = df[df['country'] == selected_country]
+    
+    if df.empty:
+        return go.Figure().update_layout(title="No Customer Data Found")
+    
+    # --- 3. CREATE VISUALIZATION (Month x Total Spent) ---
+    
+    # Ensure month is sorted correctly (YYYY-MM)
+    df['month'] = pd.Categorical(df['month'], 
+                                 categories=sorted(df['month'].unique()), 
+                                 ordered=True)
+
+    fig = px.scatter(
+        df,
+        y="total_spent",
+        x="month",
+        color="country",
+        size=[6] * len(df),  # uniform bubble size
+        size_max=10,
+        title=f"Monthly Total Spend by Country ({selected_year})",
+        template="plotly_white",
+        custom_data=['country', 'month', 'total_spent']
+    )
+
+    # Tooltip
+    fig.update_traces(
+        marker=dict(opacity=0.7, line=dict(width=0.5, color='DarkSlateGrey')),
+        hovertemplate="<b>Country:</b> %{customdata[0]}<br>" +
+                      "<b>Month:</b> %{customdata[1]}<br>" +
+                      "<b>Total Spent:</b> $%{customdata[2]:,.2f}<extra></extra>"
+    )
+
+    # Layout adjustments
+    fig.update_layout(
+        xaxis_title="Total Spent ($)",
+        yaxis_title="Month",
+        legend_title="Country",
+        yaxis=dict(
+            categoryorder="array",
+            categoryarray=sorted(df['month'].unique())
+        ),
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=12,
+            font_family="Arial"
+        ),
+        margin=dict(l=40, r=40, t=40, b=40)
+    )
+
+    return fig
+
 # Visualize of Product Issues Pareto (Bar + Line)
 def get_product_performance(selected_country = "All Countries"):
     # Get DB Connection
