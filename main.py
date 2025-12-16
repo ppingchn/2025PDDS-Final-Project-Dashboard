@@ -12,7 +12,7 @@ import numpy as np
 from datetime import datetime
 
 # Import Visualization functions from visual.py
-from visual import get_product_performance, get_country_list, get_service_quality, get_global_revenue, get_year_list
+from visual import get_product_performance, get_country_list, get_service_quality, get_global_revenue, get_year_list, get_customer_matrix_plot
 
 # Data fetching
 country_options = get_country_list()
@@ -111,7 +111,32 @@ app.layout = html.Div(style={'backgroundColor': THEME['background'], 'fontFamily
                             style={'height': '80vh'} 
                         )
                     ])
-                ])
+                ]),
+                # Card: Customer Value Matrix
+                html.Div(style=card_container_style, children=[
+                    html.Div([
+                        html.Div([
+                            html.H2("Customer Value Matrix", style={'fontSize': '22px', 'color': THEME['text'], 'marginBottom': '10px'})
+                        ], style={'width': '60%'}),
+                        html.Div([
+                            html.Label("Select Country:", style={'fontWeight': 'bold', 'marginRight': '10px', 'color': THEME['text']}),
+                            dcc.Dropdown(
+                                id='customer-country-filter',
+                                options=country_options,
+                                value='All Countries',
+                                clearable=False,
+                                style={'width': '250px'}
+                            )
+                        ], style={'width': '40%', 'display': 'flex', 'justifyContent': 'flex-end', 'alignItems': 'center'})
+                    ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'start', 'marginBottom': '20px'}),
+                    # Graph: Customer Matrix wrapped in centering div
+                    html.Div(style=graph_wrapper_style, children=[
+                        dcc.Graph(
+                            id='customer-matrix-graph',
+                            style = {'height': '80vh'}
+                        ),
+                    ]),
+                ]),
             ])
         ]),
 
@@ -222,6 +247,15 @@ def update_global_revenue(selected_year):
     )
     
     return fig_map
+
+@callback(
+    Output('customer-matrix-graph', 'figure'),[
+    Input('year-filter', 'value'),
+    Input('customer-country-filter', 'value')
+    ]
+)
+def update_customer_matrix(selected_year,selected_country):
+    return get_customer_matrix_plot(selected_year=selected_year,selected_country=selected_country)
 
 if __name__ == '__main__':
     app.run(debug=True)
