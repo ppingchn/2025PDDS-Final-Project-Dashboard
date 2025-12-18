@@ -110,6 +110,21 @@ app.layout = html.Div(style={'backgroundColor': THEME['background'], 'fontFamily
         # === TAB 1: STRATEGY ===
         dcc.Tab(label='Strategy Overview', style=tab_style, selected_style=tab_selected_style, children=[
             html.Div(style={'padding': '20px'}, children=[
+
+                # Filter: Global  Year Selection
+                html.Div(style=card_container_style, children=[
+                    html.Div([
+                        html.Span("📅", style={'fontSize': '20px', 'marginRight': '10px'}),
+                        html.Label("Select Reporting Year:", style={'fontWeight': 'bold', 'marginRight': '15px'}),
+                        dcc.Dropdown(
+                            id='year-filter',
+                            options=year_options,
+                            value=year_options[0] if year_options else None, # Default to first year
+                            clearable=False,
+                            style={'width': '200px'}
+                        )
+                    ], style={'display': 'flex', 'alignItems': 'center'})
+                ]),
                 
                 # Card: Revenue Map
                 html.Div(style=card_container_style, children=[
