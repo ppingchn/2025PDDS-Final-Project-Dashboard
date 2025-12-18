@@ -133,17 +133,6 @@ app.layout = html.Div(style={'backgroundColor': THEME['background'], 'fontFamily
                             html.H2("Global Revenue Visualization", style={'fontSize': '22px', 'color': THEME['text'], 'marginBottom': '10px'}),
                             html.P("Overview of total revenue and efficiency across different regions.", style={'color': THEME['text_light'], 'fontSize': '14px'})
                         ], style={'width': '60%'}),
-                        
-                        html.Div([
-                            html.Label("Select Year:", style={'fontWeight': 'bold', 'marginRight': '10px', 'color': THEME['text']}),
-                            dcc.Dropdown(
-                                id='year-filter',
-                                options=year_options,
-                                value=year_options[0] if year_options else None,
-                                clearable=False,
-                                style={'width': '150px'}
-                            )
-                        ], style={'width': '40%', 'display': 'flex', 'justifyContent': 'flex-end', 'alignItems': 'center'})
                     ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'start', 'marginBottom': '20px'}),
                     
                     # Graph: Map wrapped in centering div
@@ -269,6 +258,11 @@ def update_product_performance(selected_country):
     Input('year-filter', 'value')
 )
 def update_global_revenue(selected_year):
+    if not selected_year:
+        if year_options:
+            selected_year = year_options[0]
+        else:
+            return go.Figure()
     fig_map = get_global_revenue(selected_year)
     
     
@@ -291,13 +285,20 @@ def update_global_revenue(selected_year):
     return fig_map
 
 @callback(
-    Output('customer-matrix-graph', 'figure'),[
+    Output('customer-matrix-graph', 'figure'),
     Input('year-filter', 'value'),
     Input('customer-country-filter', 'value')
-    ]
 )
 def update_customer_matrix(selected_year,selected_country):
-    return get_customer_matrix_plot(selected_year=selected_year,selected_country=selected_country)
+    if not selected_year:
+        selected_year = year_options[0] if year_options else None
+    
+    if not selected_country:
+        selected_country = "All Countries"
+
+    fig_customer_matrix = get_customer_matrix_plot(selected_year, selected_country)
+        
+    return fig_customer_matrix
 
 if __name__ == '__main__':
     app.run(debug=True)
