@@ -129,68 +129,65 @@ def get_global_revenue(selected_year=None):
 
 # Visualization Functions for Tab 2: Operation Tab
 
+#
 def get_customer_matrix_plot(selected_year=None, selected_country="All Countries", return_kpis=False):
-    # 1. Connect & Fetch Data
+    # 1. Connect
     conn = get_connection()
     query = extract_query_from_file("get_customer_matrix.sql")
     
     if query is None:
         return go.Figure().update_layout(title="SQL Query not found.")
 
-    df = pd.read_sql_query(query, conn)
+    # 2. Prepare Parameters for SQL
+    # If selected_year is None, we pass None to SQL (activating the "IS NULL" logic)
+    # We convert to string just in case, to match the SQL strftime format
+    sql_year = str(selected_year) if selected_year else None
+    
+    # Handle "All Countries" logic
+    sql_country = selected_country if selected_country != "All Countries" else None
+
+    # We pass the parameters twice each because the SQL uses them twice:
+    # (? IS NULL OR Year = ?) AND (? IS NULL OR Country = ?)
+    params = (sql_year, sql_year, sql_country, sql_country)
+
+    # 3. Execute Query with Parameters
+    df = pd.read_sql_query(query, conn, params=params)
     conn.close()
 
-    # --- 2. Filter by year & country ---
-    if selected_year:
-        df = df[df['year'] == str(selected_year)]
-    
-    if selected_country != "All Countries":
-        df = df[df['country'] == selected_country]
-    
+    # Safety: Handle empty results
     if df.empty:
-        return go.Figure().update_layout(title="No Customer Data Found")
-    
-    # --- 3. CREATE VISUALIZATION (Month x Total Spent) ---
-    
-    # Ensure month is sorted correctly (YYYY-MM)
-    df['month'] = pd.Categorical(df['month'], 
-                                 categories=sorted(df['month'].unique()), 
-                                 ordered=True)
+        return go.Figure().update_layout(title=f"No data for {selected_country} in {selected_year or 'All Years'}")
 
-    fig = px.scatter(
+    # 4. Post-Processing
+    # Since SQL now gives us a proper 'YYYY-MM-01' string, we just convert it directly.
+    # No more manual string concatenation needed!
+    df['full_date'] = pd.to_datetime(df['full_date'])
+
+    # 5. Visualization
+    fig = px.line(
         df,
-        y="total_spent",
-        x="month",
-        color="country",
-        size=[6] * len(df),  # uniform bubble size
-        size_max=10,
-        title=f"Monthly Total Spend by Country ({selected_year})",
+        x='full_date',
+        y='total_spent',
+        color='country',
+        markers=True,
+        title=f"Customer Monthly Total Spend ({selected_year if selected_year else 'All Time'})",
         template="plotly_white",
-        custom_data=['country', 'month', 'total_spent']
+        custom_data=['country', 'full_date', 'total_spent']
     )
 
-    # Tooltip
+    # Tooltip Styling
     fig.update_traces(
-        marker=dict(opacity=0.7, line=dict(width=0.5, color='DarkSlateGrey')),
-        hovertemplate="<b>Country:</b> %{customdata[0]}<br>" +
-                      "<b>Month:</b> %{customdata[1]}<br>" +
-                      "<b>Total Spent:</b> $%{customdata[2]:,.2f}<extra></extra>"
+        hovertemplate="<b>Country:</b> %{customdata[0]}<br>"
+                      "<b>Date:</b> %{x|%B %Y}<br>"
+                      "<b>Total Spent:</b> $%{y:,.2f}<extra></extra>"
     )
 
-    # Layout adjustments
+    # Layout
     fig.update_layout(
-        xaxis_title="Total Spent ($)",
-        yaxis_title="Month",
-        legend_title="Country",
-        yaxis=dict(
-            categoryorder="array",
-            categoryarray=sorted(df['month'].unique())
-        ),
-        hoverlabel=dict(
-            bgcolor="white",
-            font_size=12,
-            font_family="Arial"
-        ),
+        xaxis_title='Month',
+        yaxis_title='Total Spent ($)',
+        xaxis=dict(type='date', dtick="M1", tickformat="%b %Y"),
+        hoverlabel=dict(bgcolor='white'),
         margin=dict(l=40, r=40, t=40, b=40)
     )
 
