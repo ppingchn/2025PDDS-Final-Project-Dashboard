@@ -139,6 +139,7 @@ def get_customer_matrix_plot(selected_year=None, selected_country="All Countries
 
     df = pd.read_sql_query(query, conn)
     conn.close()
+    
 
     # --- 2. Filter by year & country ---
     if selected_year:
@@ -151,45 +152,48 @@ def get_customer_matrix_plot(selected_year=None, selected_country="All Countries
         return go.Figure().update_layout(title="No Customer Data Found")
     
     # --- 3. CREATE VISUALIZATION (Month x Total Spent) ---
-    
+    # --- 3. AGGREGATE: one dot per month per country (everyone combined) ---
+    df_agg = (
+        df.groupby(['country', 'month'], as_index=False)
+            .agg(total_spent=('total_spent', 'sum'))
+)
+    df_agg['total_spent'] = pd.to_numeric(df_agg['total_spent'], errors='coerce')
     # Ensure month is sorted correctly (YYYY-MM)
-    df['month'] = pd.Categorical(df['month'], 
-                                 categories=sorted(df['month'].unique()), 
-                                 ordered=True)
+   # df_agg['month'] = pd.to_datetime(df_agg['month'])
+    #df_agg = df_agg.sort_values(by='month')
 
-    fig = px.scatter(
-        df,
-        y="total_spent",
-        x="month",
-        color="country",
-        size=[6] * len(df),  # uniform bubble size
-        size_max=10,
-        title=f"Monthly Total Spend by Country ({selected_year})",
-        template="plotly_white",
-        custom_data=['country', 'month', 'total_spent']
+    fig = px.line(
+    df_agg,
+    x='month',
+    y='total_spent',
+    color='country',
+    markers=True,           # one dot per month
+    title=f"Customer Monthly Total Spend ({selected_year})",
+    template="plotly_white",
+    custom_data=['country', 'month', 'total_spent']
     )
+
+
 
     # Tooltip
     fig.update_traces(
-        marker=dict(opacity=0.7, line=dict(width=0.5, color='DarkSlateGrey')),
-        hovertemplate="<b>Country:</b> %{customdata[0]}<br>" +
-                      "<b>Month:</b> %{customdata[1]}<br>" +
-                      "<b>Total Spent:</b> $%{customdata[2]:,.2f}<extra></extra>"
-    )
+    marker=dict(opacity=0.7, line=dict(width=0.5, color='DarkSlateGrey')),
+    hovertemplate=
+    "<b>Country:</b> %{customdata[0]}<br>"
+    "<b>Month:</b> %{customdata[1]}<br>"
+    "<b>Total Spent:</b> $%{customdata[2]:,.2f}<extra></extra>"
+)
+
 
     # Layout adjustments
     fig.update_layout(
-        xaxis_title="Total Spent ($)",
-        yaxis_title="Month",
-        legend_title="Country",
-        yaxis=dict(
-            categoryorder="array",
-            categoryarray=sorted(df['month'].unique())
-        ),
-        hoverlabel=dict(
-            bgcolor="white",
-            font_size=12,
-            font_family="Arial"
+        xaxis_title='Month',
+    yaxis_title='Total Spent ($)',
+    xaxis=dict(type='date'),  # critical for correct spacing
+    hoverlabel=dict(
+        bgcolor='white',
+        font_size=12,
+        font_family='Arial'
         ),
         margin=dict(l=40, r=40, t=40, b=40)
     )
