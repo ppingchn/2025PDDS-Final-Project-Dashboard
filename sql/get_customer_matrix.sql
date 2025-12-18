@@ -1,11 +1,15 @@
 SELECT 
-		c.customer_id, 
-		c.country,
-		strftime('%Y', o.order_date) AS year, 
-		strftime('%m', o.order_date) AS month, 
-		SUM(oi.quantity * oi.unit_price) AS total_spent, 
-		COUNT(DISTINCT o.order_id) AS total_frequency_purchase 
-FROM Orders o JOIN Customers c ON o.customer_id = c.customer_id 
+    c.country,
+    STRFTIME('%Y-%m-01', o.order_date) as full_date,
+    SUM(oi.quantity * oi.unit_price) as total_spent
+FROM Orders o 
+JOIN Customers c ON o.customer_id = c.customer_id 
 JOIN Order_Items oi ON o.order_id = oi.order_id 
-WHERE o.order_status IN ('Pending', 'Delivered', 'Shipped') 
-GROUP BY c.country, year,month
+WHERE 
+    o.order_status IN ('Pending', 'Delivered', 'Shipped')
+    AND (? IS NULL OR STRFTIME('%Y', o.order_date) = ?)
+    AND (? IS NULL OR c.country = ?)
+GROUP BY 
+    c.country, full_date
+ORDER BY 
+    full_date;
