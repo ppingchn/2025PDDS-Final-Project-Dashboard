@@ -1,5 +1,4 @@
 dash
 pysqlite3
 pandas
-plotly.express
-plotly.graph_objects
+plotly
