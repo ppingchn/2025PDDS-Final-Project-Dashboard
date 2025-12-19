@@ -85,7 +85,7 @@ app.layout = html.Div(style={'backgroundColor': THEME['background'], 'fontFamily
     # --- HEADER ---
     html.Div(style=header_style, children=[
         html.Div([
-            html.Span("📊", style={'fontSize': '32px', 'marginRight': '15px'}),
+            # html.Span("📊", style={'fontSize': '32px', 'marginRight': '15px'}),
             html.Div([
                 html.H1("3PY E-COMMERCE", style={
                     'color': THEME['primary'], 
@@ -114,7 +114,7 @@ app.layout = html.Div(style={'backgroundColor': THEME['background'], 'fontFamily
                 # Filter: Global  Year Selection
                 html.Div(style=card_container_style, children=[
                     html.Div([
-                        html.Span("📅", style={'fontSize': '20px', 'marginRight': '10px'}),
+                        # html.Span("📅", style={'fontSize': '20px', 'marginRight': '10px'}),
                         html.Label("Select Reporting Year:", style={'fontWeight': 'bold', 'marginRight': '15px'}),
                         dcc.Dropdown(
                             id='year-filter',
