@@ -1,4 +1,4 @@
 dash
-pysqlite3
+# sqlite3
 pandas
 plotly
